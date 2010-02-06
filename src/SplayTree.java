@@ -37,7 +37,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 	 * @return 	an iterator to traverse the nodes in order 
 	 */
 	public Iterator<T> iterator() {
-		return new inOrderTreeIterator(root);
+		return new preOrderTreeIterator(root);
 	}
 	
 	/**
@@ -45,8 +45,8 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 	 * 
 	 * @return 	an iterator to traverse the nodes in preorder
 	 */
-	public Iterator<T> preOrderIterator() {
-		return new preOrderTreeIterator(root);
+	public Iterator<T> inOrderIterator() {
+		return new inOrderTreeIterator(root);
 	}
 	
 	/**
@@ -58,7 +58,13 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 		if(root == null) {
 			return new ArrayList<Object>();
 		}
-		return (ArrayList<Object>) root.toArrayList(new ArrayList<T>());
+		Iterator<T> i = this.iterator();
+		ArrayList<Object> treeArrayList = new ArrayList<Object>();
+		while(i.hasNext()) {
+			treeArrayList.add(i.next());
+		}
+		//return (ArrayList<Object>) root.toArrayList(new ArrayList<T>());
+		return treeArrayList;
 	}
 	
 	/**
@@ -122,12 +128,33 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 			throw new IllegalArgumentException();
 		}
 		if(root != null) {
-			return root.insert(item);
+			root = root.splay(item);
+			int rootCompare = item.compareTo(root.element);
+			if(rootCompare == 0) {
+				return false;
+			}
+			BinaryNode node = new BinaryNode(item);
+			if(rootCompare > 0) {
+				if(root.right != null) {
+					node.right = root.right;
+					root.right = null;
+				}
+				node.left = root;
+			}
+			if(rootCompare < 0) {
+				if(root.left != null) {
+					node.left = root.left;
+					root.left = null;
+				}
+				node.right = root;
+			}
+			root = node;
+			modCount++;
 		} else {
 			root = new BinaryNode(item);
 			modCount++;
-			return true;
-		} 
+		}
+		return true;
 	}
 	
 	/**
@@ -138,18 +165,44 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 	 * @exception	IllegalArgumentException if item is null
 	 */
 	public boolean remove(T item) {
-		modWrapper mod = new modWrapper();
 		if(item == null) {
 			throw new IllegalArgumentException();
 		}
 		if(root != null) {
-			root = root.remove(item, mod);
+			root = root.splay(item);
+			if(item.compareTo(root.element) != 0) {
+				return false;
+			}
+			BinaryNode node;
+			if(root.left != null) {
+				node = root.splay(findLargestChild(root.left).element);
+				rightTree = root.right; 
+				leftTree = root.left;
+				root = node;
+				node.right = rightTree;
+				node.left = leftTree;
+			} else {
+				root = root.right;
+			}
+		} else {
+			return false;
 		}
-		if(mod.getValue()) {
-			modCount++;
-		}
-		return mod.getValue();
+		return true;
 	}
+	
+	/**
+	 * Method that finds the largest left child
+	 * 
+	 * @param node	BinaryNode to look for largest left child
+	 * @return 	the largest left child of the provided BinaryNode
+	 */
+	public BinaryNode findLargestChild(BinaryNode node) {
+		while(node.right != null) {
+			node = node.right;
+		}
+		return node;
+	}
+	
 	
 	/**
 	 * Get method that returns a pointer to the item provided
@@ -248,92 +301,35 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 			return size;
 		}
 		
-		/**
-		 * Inserts the provided element as a child to the BinaryNode
-		 * The item becomes a left child if less than current BinaryNode
-		 * The item becomes a right child if greater than current BinaryNode
-		 * If the insert is successful adds 1 to the modCount
-		 * 
-		 * @param item	item to be inserted as a child to the BinaryNode
-		 * @return 	true if insert successful; false if not
-		 */
-		public boolean insert(T item) {
-			if(element.compareTo(item) < 0) {
-				if(right != null) {
-					return right.insert(item);
+		private BinaryNode splay(T item) {
+			int thisCompare = item.compareTo(element);
+			if(thisCompare == 0) {
+				return this;
+			} else if(thisCompare < 0) {	
+				if(left != null && left.left != null && item.compareTo(left.element) < 0 && item.compareTo(left.left.element) < 0) {
+					//zig
+					return this.rightZigZig(this);
+				} else if(left != null && left.left == null && item.compareTo(left.element) < 0){
+					//zigzig
+					System.out.println("zigzig1");
+					return this.rightZig(this);
 				} else {
-					right = new BinaryNode(item);
-					modCount++;
-					return true;
-				}
-			} else if(element.compareTo(item) > 0){
-				if(left != null) {
-					return left.insert(item);
-				} else {
-					left = new BinaryNode(item);
-					modCount++;
-					return true;
+					//return parent
+					return this;
 				}
 			} else {
-				return false;
-			}
-		}
-		
-		/**
-		 * Removes the provided item from the BinaryNode
-		 * In the event of the BinaryNode having two children, the
-		 * algorithm finds the largest left child.
-		 * 
-		 * @param item 	the item that will be removed from the BinaryNode
-		 * @param mod 	ModWrapper boolean that will be set to true if remove successful
-		 * @return 	BinaryNode that is removed
-		 */
-		public BinaryNode remove(T item, modWrapper mod) {
-			if(left == null && right == null) {
-				if(item.compareTo(element) == 0) {
-					mod.setTrue();
-					return null;
-				}
-				return this;
-			} else if(right == null) {
-				if(item.compareTo(element) < 0) {
-					left = left.remove(item, mod);
-				}
-				mod.setTrue();
-				return left;
-			} else if(left == null) {
-				if(item.compareTo(element) > 0) {
-					right = right.remove(item, mod);
-				}
-				mod.setTrue();
-				return right;
-			} else {
-				if(item.compareTo(element) > 0) {
-					right = right.remove(item,mod);
-				} else if(item.compareTo(element) < 0) {
-					left = left.remove(item, mod);
+				if(right != null && right.right != null && item.compareTo(right.element) > 0 && item.compareTo(right.right.element) > 0) {
+					//zig
+					return this.leftZigZig(this);
+				} else if(right != null && right.right == null && item.compareTo(right.element) < 0) {
+					//zigzig
+					System.out.println("zigzig2");
+					return this.leftZig(this);
 				} else {
-					T temp = element;
-					BinaryNode largestChildNode = findLargestChild(left);
-					element = largestChildNode.element;
-					largestChildNode.element = temp;
-					left = left.remove(temp, mod);
+					//return parent
+					return this;
 				}
-				return this;
 			}
-		}
-		
-		/**
-		 * Method that finds the largest left child
-		 * 
-		 * @param node	BinaryNode to look for largest left child
-		 * @return 	the largest left child of the provided BinaryNode
-		 */
-		public BinaryNode findLargestChild(BinaryNode node) {
-			while(node.right != null) {
-				node = node.right;
-			}
-			return node;
 		}
 		
 		/**
