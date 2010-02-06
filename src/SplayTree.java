@@ -58,7 +58,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 		if(root == null) {
 			return new ArrayList<Object>();
 		}
-		Iterator<T> i = this.iterator();
+		Iterator<T> i = iterator();
 		ArrayList<Object> treeArrayList = new ArrayList<Object>();
 		while(i.hasNext()) {
 			treeArrayList.add(i.next());
@@ -175,9 +175,9 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 			}
 			BinaryNode node;
 			if(root.left != null) {
-				node = root.splay(findLargestChild(root.left).element);
+				node = root.left.splay(findLargestChild(root.left).element);
 				rightTree = root.right; 
-				leftTree = root.left;
+				leftTree = root.left.left;
 				root = node;
 				node.right = rightTree;
 				node.left = leftTree;
@@ -203,19 +203,23 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 		return node;
 	}
 	
-	
 	/**
-	 * Get method that returns a pointer to the item provided
+	 * Find method that returns a pointer to the item provided
 	 * 
-	 * @param item item to be found in the SplayTree
+	 * @param item item to be found in the BinaryNode
 	 * @return pointer to item if found; null if not found
-	 * @exception IllegalArgumentException if item is null
 	 */
-	public BinaryNode find(T item) {
+	public T find(T item) {
 		if(item == null) {
 			throw new IllegalArgumentException();
 		}
-		return root.find(item);
+		if(root != null) {
+			root = root.splay(item);
+			if(item.compareTo(root.element) == 0) {
+				return root.element;
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -329,22 +333,6 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 					//return parent
 					return this;
 				}
-			}
-		}
-		
-		/**
-		 * Find method that returns a pointer to the item provided
-		 * 
-		 * @param item item to be found in the BinaryNode
-		 * @return pointer to item if found; null if not found
-		 */
-		public BinaryNode find(T item) {
-			if(item.compareTo(element) > 0) {
-				return right.find(item);
-			} else if(item.compareTo(element) < 0) {
-				return left.find(item);
-			} else {
-				return this;
 			}
 		}
 		
