@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Stack;
 
 /**
- * A BinarySearchTree implementation class
+ * A SplayTree implementation class
  * @author risdenkj
  * 
  */
@@ -15,7 +15,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 	private int modCount = 0;
 	
 	/**
-	 * Constructs a BinarySearchTree
+	 * Constructs a SplayTree
 	 * Sets the root to null
 	 */
 	public SplayTree() {
@@ -23,9 +23,9 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 	}
 
 	/**
-	 * Checks if the BinarySearchTree has no nodes
+	 * Checks if the SplayTree has no nodes
 	 * 
-	 * @return 	true if the BinarySearchTree has no nodes; false if has nodes
+	 * @return 	true if the SplayTree has no nodes; false if has nodes
 	 */
 	public boolean isEmpty() {
 		return root == null ? true : false;
@@ -50,19 +50,19 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 	}
 	
 	/**
-	 * Method that returns an ArrayList representation of the BinarySearchTree
+	 * Method that returns an ArrayList representation of the SplayTree
 	 * 
 	 * @return 	ArrayList with the nodes in order
 	 */
-	public ArrayList<T> toArrayList() {
+	public ArrayList<Object> toArrayList() {
 		if(root == null) {
-			return new ArrayList<T>();
+			return new ArrayList<Object>();
 		}
-		return root.toArrayList(new ArrayList<T>());
+		return (ArrayList<Object>) root.toArrayList(new ArrayList<T>());
 	}
 	
 	/**
-	 * Method that returns an Array representation of the BinarySearchTree
+	 * Method that returns an Array representation of the SplayTree
 	 * 
 	 * @return 	Array with the nodes in order
 	 */
@@ -71,18 +71,18 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 	}
 
 	/**
-	 * Method to determine the height of the BinarySearchTree
+	 * Method to determine the height of the SplayTree
 	 * 
-	 * @return 	height of the BinarySearchTree; -1 if BinarySearchTree is empty
+	 * @return 	height of the SplayTree; -1 if SplayTree is empty
 	 */
 	public int height(){
 		return !isEmpty() ? root.height() : -1;
 	}
 	
 	/**
-	 * Method that returns a String representation of the BinarySearchTree
+	 * Method that returns a String representation of the SplayTree
 	 * 
-	 * @return 	string in [element, element] format with the BinarySearchTree BinaryNodes in order 
+	 * @return 	string in [element, element] format with the SplayTree BinaryNodes in order 
 	 */
 	public String toString() {
 		String temp = "";
@@ -100,9 +100,9 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 	}
 	
 	/**
-	 * Method to determine the size of the BinarySearchTree
+	 * Method to determine the size of the SplayTree
 	 * 
-	 * @return 	size of the BinarySearchTree; 0 if BinarySearchTree is empty
+	 * @return 	size of the SplayTree; 0 if SplayTree is empty
 	 */
 	public int size() {
 		return !isEmpty() ? root.size() : 0;
@@ -111,9 +111,9 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 	/**
 	 * Returns a boolean value representing whether the tree was modified
 	 * or not. The item argument must be of the same type that was used 
-	 * when initiating the BinarySearchTree class.
+	 * when initiating the SplayTree class.
 	 *
-	 * @param item	the item to be inserted into the BinarySearchTree
+	 * @param item	the item to be inserted into the SplayTree
 	 * @return      true if the tree was modified, false if not
 	 * @exception	IllegalArgumentException if item is null
 	 */
@@ -131,9 +131,9 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 	}
 	
 	/**
-	 * Removes the provided item from the BinarySearchTree
+	 * Removes the provided item from the SplayTree
 	 * 
-	 * @param item	the item that will be removed from the BinarySearchTree
+	 * @param item	the item that will be removed from the SplayTree
 	 * @return		true if remove successful; false if not
 	 * @exception	IllegalArgumentException if item is null
 	 */
@@ -154,15 +154,15 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 	/**
 	 * Get method that returns a pointer to the item provided
 	 * 
-	 * @param item item to be found in the BinarySearchTree
+	 * @param item item to be found in the SplayTree
 	 * @return pointer to item if found; null if not found
 	 * @exception IllegalArgumentException if item is null
 	 */
-	public T get(T item) {
+	public BinaryNode find(T item) {
 		if(item == null) {
 			throw new IllegalArgumentException();
 		}
-		return root.get(item);
+		return root.find(item);
 	}
 	
 	/**
@@ -337,18 +337,18 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 		}
 		
 		/**
-		 * Get method that returns a pointer to the item provided
+		 * Find method that returns a pointer to the item provided
 		 * 
 		 * @param item item to be found in the BinaryNode
 		 * @return pointer to item if found; null if not found
 		 */
-		public T get(T item) {
+		public BinaryNode find(T item) {
 			if(item.compareTo(element) > 0) {
-				return right.get(item);
+				return right.find(item);
 			} else if(item.compareTo(element) < 0) {
-				return left.get(item);
+				return left.find(item);
 			} else {
-				return element;
+				return this;
 			}
 		}
 	}
@@ -375,7 +375,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 	}
 	
 	/**
-	 * A preorder BinarySearchTree iterator implementation class
+	 * A preorder SplayTree iterator implementation class
 	 * @author risdenkj
 	 * 
 	 */
@@ -398,7 +398,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 		}
 		
 		/**
-		 * Checks if there is another element in the BinarySearchTree that hasn't been accessed
+		 * Checks if there is another element in the SplayTree that hasn't been accessed
 		 * 
 		 * @return	true if there is another element to return; false if not
 		 */
@@ -407,10 +407,10 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 		}
 
 		/**
-		 * Method that returns the next BinaryNode element from the BinarySearchTree
+		 * Method that returns the next BinaryNode element from the SplayTree
 		 * 
-		 * @return BinaryNode	element in the BinarySearchTree
-		 * @exception 	ConcurrentModificationException if the BinarySearchTree was modified after initializing the iterator
+		 * @return BinaryNode	element in the SplayTree
+		 * @exception 	ConcurrentModificationException if the SplayTree was modified after initializing the iterator
 		 * @exception 	NoSuchElementException if there are no more elements to return
 		 */
 		public T next() {
@@ -436,7 +436,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 		}
 		
 		/**
-		 * Removes an element from the BinarySearchTree
+		 * Removes an element from the SplayTree
 		 * 
 		 * @exception	IllegalStateException if next() not called before
 		 */
@@ -452,7 +452,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 	}
 	
 	/**
-	 * An in order BinarySearchTree iterator implementation class
+	 * An in order SplayTree iterator implementation class
 	 * @author risdenkj
 	 * 
 	 */
@@ -473,7 +473,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 		}
 		
 		/**
-		 * Checks if there is another element in the BinarySearchTree that hasn't been accessed
+		 * Checks if there is another element in the SplayTree that hasn't been accessed
 		 * 
 		 * @return 	true if there is another element to return; false if not
 		 */
@@ -482,10 +482,10 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 		}
 		
 		/**
-		 * Method that returns the next BinaryNode element from the BinarySearchTree
+		 * Method that returns the next BinaryNode element from the SplayTree
 		 * 
-		 * @return BinaryNode	element in the BinarySearchTree
-		 * @exception 	ConcurrentModificationException if the BinarySearchTree was modified after initializing the iterator
+		 * @return BinaryNode	element in the SplayTree
+		 * @exception 	ConcurrentModificationException if the SplayTree was modified after initializing the iterator
 		 * @exception 	NoSuchElementException if there are no more elements to return
 		 */
 		public T next() {
@@ -515,7 +515,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 		}
 		
 		/**
-		 * Removes an element from the BinarySearchTree
+		 * Removes an element from the SplayTree
 		 * 
 		 * @exception	IllegalStateException if next() not called before
 		 */
