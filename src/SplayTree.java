@@ -10,7 +10,7 @@ import java.util.Stack;
  * 
  */
 
-public class SplayTree<T extends Comparable<? super T>> implements Insertable, Iterable<T> {
+public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 	private BinaryNode root;
 	private int modCount = 0;
 	
@@ -528,11 +528,5 @@ public class SplayTree<T extends Comparable<? super T>> implements Insertable, I
 				mod++;
 			}
 		}
-	}
-
-	@Override
-	public boolean insert(Object o) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 }

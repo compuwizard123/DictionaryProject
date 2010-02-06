@@ -1,20 +1,29 @@
 import java.util.ArrayList;
 
 
-public class Entry implements Comparable<Object>{
-
-	public Entry(String string, String string2) {
-		// TODO Auto-generated constructor stub
+public class Entry implements Comparable<Entry>, Insertable {
+	ArrayList<String> definitions = new ArrayList<String>();
+	String word;
+	
+	public Entry(String word, String definition) {
+		this.word = word;
+		definitions.add(definition);
 	}
 
-	public int compareTo(Object arg0) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int compareTo(Entry item) {
+		return item.getEntry().compareTo(this.word);
 	}
 
 	public ArrayList<String> getDefinitions() {
-		// TODO Auto-generated method stub
-		return null;
+		return definitions;
 	}
 
+	public boolean insert(Object o) {
+		
+		return false;
+	}
+	
+	public String getEntry() {
+		return this.word;
+	}
 }
