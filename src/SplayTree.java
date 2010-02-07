@@ -131,7 +131,11 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 			root = root.splay(item);
 			int rootCompare = item.compareTo(root.element);
 			if(rootCompare == 0) {
-				return false;
+			    if(item instanceof Insertable){
+			    	return ((Insertable)root.element).insert(item);
+			    } else {
+			    	return false;
+				}
 			}
 			BinaryNode node = new BinaryNode(item);
 			if(rootCompare > 0) {
@@ -154,6 +158,8 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 			root = new BinaryNode(item);
 			modCount++;
 		}
+		
+
 		return true;
 	}
 	
@@ -311,11 +317,10 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 				return this;
 			} else if(thisCompare < 0) {	
 				if(left != null && left.left != null && item.compareTo(left.element) < 0 && item.compareTo(left.left.element) < 0) {
-					//zig
+					//zigzig
 					return this.rightZigZig(this);
 				} else if(left != null && left.left == null && item.compareTo(left.element) < 0){
-					//zigzig
-					System.out.println("zigzig1");
+					//zig
 					return this.rightZig(this);
 				} else {
 					//return parent
@@ -323,11 +328,10 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 				}
 			} else {
 				if(right != null && right.right != null && item.compareTo(right.element) > 0 && item.compareTo(right.right.element) > 0) {
-					//zig
+					//zigzig
 					return this.leftZigZig(this);
 				} else if(right != null && right.right == null && item.compareTo(right.element) < 0) {
-					//zigzig
-					System.out.println("zigzig2");
+					//zig
 					return this.leftZig(this);
 				} else {
 					//return parent

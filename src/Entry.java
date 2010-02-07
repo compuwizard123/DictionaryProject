@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Iterator;
 
 
 public class Entry implements Comparable<Entry>, Insertable {
@@ -7,7 +8,7 @@ public class Entry implements Comparable<Entry>, Insertable {
 	
 	public Entry(String word, String definition) {
 		this.word = word;
-		definitions.add(definition);
+		this.definitions.add(definition);
 	}
 
 	public int compareTo(Entry item) {
@@ -19,8 +20,12 @@ public class Entry implements Comparable<Entry>, Insertable {
 	}
 
 	public boolean insert(Object o) {
-		
-		return false;
+		ArrayList<String> defs = ((Entry) o).getDefinitions();
+		Iterator<String> i = defs.iterator();
+		while(i.hasNext()) {
+			definitions.add(((String) i.next()));
+		}
+		return true;
 	}
 	
 	public String getEntry() {
