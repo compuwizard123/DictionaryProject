@@ -92,7 +92,6 @@ public static int points = 0;
 		// zigzig		
 		s.insert(6);
 		test = new ArrayList<Object>();
-		System.out.println(s);
 		test.add(6);
 		test.add(5);
 		test.add(3);
@@ -104,13 +103,9 @@ public static int points = 0;
 		// before zigizig, symmetric case
 		s = new SplayTree<Integer>();
 		s.insert(5);
-		System.out.println(s);
 		s.insert(7);
-		System.out.println(s);
 		s.insert(6);
-		System.out.println(s);
 		s.insert(8);
-		System.out.println(s);
 		
 		test = new ArrayList<Object>();
 		test.add(8);
@@ -155,7 +150,6 @@ public static int points = 0;
 		points += 2;
 
 		// "zigzag"
-		System.out.println(s);
 		s.find(3);
 		test = new ArrayList<Object>();
 		test.add(3);
