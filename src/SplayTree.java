@@ -130,9 +130,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 			throw new IllegalArgumentException();
 		}
 		if(root != null) {
-			root = root.splay(item);
-			
-			assembleTree();
+			root = assembleTree(root.splay(item));
 			
 			int rootCompare = item.compareTo(root.element);
 			if(rootCompare == 0) {
@@ -182,21 +180,20 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 			throw new IllegalArgumentException();
 		}
 		if(root != null) {
-			root = root.splay(item);
-			
-			assembleTree();
+			root = assembleTree(root.splay(item));
 			
 			if(item.compareTo(root.element) != 0) {
 				return false;
 			}
 			BinaryNode node;
 			if(root.left != null) {
-				node = root.left.splay(findLargestChild(root.left).element);
-				rightTree = root.right; 
-				leftTree = root.left.left;
+				leftTree = null;
+				rightTree = null;
+				node = assembleTree(root.left.splay(findMax(root.left).element));
+				node.right = root.right;
 				root = node;
-				node.right = rightTree;
-				node.left = leftTree;
+				//node.right = rightTree;
+				//node.left = leftTree;
 			} else {
 				root = root.right;
 			}
@@ -204,19 +201,6 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 			return false;
 		}
 		return true;
-	}
-	
-	/**
-	 * Method that finds the largest left child
-	 * 
-	 * @param node	BinaryNode to look for largest left child
-	 * @return 	the largest left child of the provided BinaryNode
-	 */
-	public BinaryNode findLargestChild(BinaryNode node) {
-		while(node.right != null) {
-			node = node.right;
-		}
-		return node;
 	}
 	
 	/**
@@ -232,9 +216,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 			throw new IllegalArgumentException();
 		}
 		if(root != null) {
-			root = root.splay(item);
-			
-			assembleTree();
+			root = assembleTree(root.splay(item));
 			
 			if(item.compareTo(root.element) == 0) {
 				return root.element;
@@ -244,17 +226,18 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 	}
 	
 	
-	private void assembleTree() {
-		BinaryNode A = root.left;
-		BinaryNode B = root.right;
+	private BinaryNode assembleTree(BinaryNode node) {
+		BinaryNode A = node.left;
+		BinaryNode B = node.right;
 		if(leftTree != null) {
-			root.left = leftTree;
+			node.left = leftTree;
 			findMax(leftTree).right = A;
 		}
 		if(rightTree != null) {
-			root.right = rightTree;
+			node.right = rightTree;
 			findMin(rightTree).left = B;
 		}
+		return node;
 	}
 	
 	private BinaryNode findMin(BinaryNode node) {
@@ -375,7 +358,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 			if(thisCompare == 0) {
 				return this;
 			} else if(thisCompare < 0) {	
-				if(left != null && left.left != null && item.compareTo(left.element) < 0 && item.compareTo(left.left.element) < 0) {
+				if(left != null && left.left != null && item.compareTo(left.element) < 0) {
 					return this.rightZigZig(this).splay(item);
 				} else if((left != null && left.left == null && item.compareTo(left.element) <= 0) || (left != null && item.compareTo(left.element) > 0)){
 					return this.rightZig(this).splay(item);
@@ -384,7 +367,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 					return this;
 				}
 			} else {
-				if(right != null && right.right != null && item.compareTo(right.element) > 0 && item.compareTo(right.right.element) > 0) {
+				if(right != null && right.right != null && item.compareTo(right.element) > 0 ){
 					return this.leftZigZig(this).splay(item);
 				} else if((right != null && right.right == null && item.compareTo(right.element) >= 0) || (right != null && item.compareTo(right.element) < 0)) {
 					return this.leftZig(this).splay(item);
@@ -403,13 +386,13 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 		 * @return node An AVLNode that has been rotated
 		 */
 		public BinaryNode rightZig(BinaryNode node) {
-			System.out.println("rightzig");
+			//System.out.println("rightzig");
 			BinaryNode x = new BinaryNode(node.element);
 			x.right = node.right;
 			BinaryNode y = node.left;
 			
 			if(rightTree != null) {
-				rightTree.splay(findMin(rightTree).element).left = x;
+				findMin(rightTree).left = x;
 			} else {
 				rightTree = new BinaryNode(x.element);
 				rightTree.right = x.right;
@@ -426,16 +409,16 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 		 * @return node An BinaryNode that has been rotated
 		 */
 		public BinaryNode leftZig(BinaryNode node) {
-			System.out.println("leftzig");
+			//System.out.println("leftzig");
 			BinaryNode x = new BinaryNode(node.element);
 			x.left = node.left;
 			BinaryNode y = node.right;
 			
 			if(leftTree != null) {
-				leftTree.splay(findMax(leftTree).element).right = x;
+				findMax(leftTree).right = x;
 			} else {
 				leftTree = new BinaryNode(x.element);
-				leftTree.right = x.left;
+				leftTree.left = x.left;
 			}
 			
 			node = y;
@@ -443,7 +426,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 		}
 		
 		public BinaryNode rightZigZig(BinaryNode node) {
-			System.out.println("rightzigzig");
+			//System.out.println("rightzigzig");
 			BinaryNode x = new BinaryNode(node.element);
 			x.right = node.right;
 			if(node.left.right != null) {
@@ -456,7 +439,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 			
 			BinaryNode z = node.left.left;
 			if(rightTree != null) {
-				rightTree.splay(findMin(rightTree).element).left = y;
+				findMin(rightTree).left = y;
 			} else {
 				rightTree = new BinaryNode(y.element);
 				rightTree.right = x;
@@ -466,7 +449,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 		}
 		
 		public BinaryNode leftZigZig(BinaryNode node) {
-			System.out.println("leftzigzig");
+			//System.out.println("leftzigzig");
 			BinaryNode x = new BinaryNode(node.element);
 			x.left = node.left;
 			if(node.right.left != null) {
@@ -479,7 +462,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 			
 			BinaryNode z = node.right.right;
 			if(leftTree != null) {
-				leftTree.splay(findMax(leftTree).element).right = y;
+				findMax(leftTree).right = y;
 			} else {
 				leftTree = new BinaryNode(y.element);
 				leftTree.left = x;
