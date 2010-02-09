@@ -10,7 +10,7 @@ import java.util.Stack;
  * 
  */
 
-public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
+public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 	private BinaryNode root, leftTree, rightTree;
 	private int modCount = 0;
 	
@@ -36,7 +36,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 	 * 
 	 * @return 	an iterator to traverse the nodes in order 
 	 */
-	public Iterator<T> iterator() {
+	public Iterator<BinaryNode> iterator() {
 		return new preOrderTreeIterator(root);
 	}
 	
@@ -58,10 +58,10 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 		if(root == null) {
 			return new ArrayList<Object>();
 		}
-		Iterator<T> i = iterator();
+		Iterator<BinaryNode> i = iterator();
 		ArrayList<Object> treeArrayList = new ArrayList<Object>();
 		while(i.hasNext()) {
-			treeArrayList.add(i.next());
+			treeArrayList.add(i.next().element);
 		}
 		//return (ArrayList<Object>) root.toArrayList(new ArrayList<T>());
 		return treeArrayList;
@@ -95,7 +95,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 		if(root == null) {
 			return temp;
 		}
-		Iterator<T> i = iterator();
+		Iterator<BinaryNode> i = iterator();
 		while(i.hasNext()) {
 			temp += "[" + i.next() + "]";
 			if(i.hasNext()) {
@@ -124,11 +124,16 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 	 * @exception	IllegalArgumentException if item is null
 	 */
 	public boolean insert(T item) {
+		leftTree = null;
+		rightTree = null;
 		if(item == null) {
 			throw new IllegalArgumentException();
 		}
 		if(root != null) {
 			root = root.splay(item);
+			
+			assembleTree();
+			
 			int rootCompare = item.compareTo(root.element);
 			if(rootCompare == 0) {
 			    if(item instanceof Insertable){
@@ -171,11 +176,16 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 	 * @exception	IllegalArgumentException if item is null
 	 */
 	public boolean remove(T item) {
+		leftTree = null;
+		rightTree = null;
 		if(item == null) {
 			throw new IllegalArgumentException();
 		}
 		if(root != null) {
 			root = root.splay(item);
+			
+			assembleTree();
+			
 			if(item.compareTo(root.element) != 0) {
 				return false;
 			}
@@ -216,16 +226,49 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 	 * @return pointer to item if found; null if not found
 	 */
 	public T find(T item) {
+		leftTree = null;
+		rightTree = null;
 		if(item == null) {
 			throw new IllegalArgumentException();
 		}
 		if(root != null) {
 			root = root.splay(item);
+			
+			assembleTree();
+			
 			if(item.compareTo(root.element) == 0) {
 				return root.element;
 			}
 		}
 		return null;
+	}
+	
+	
+	private void assembleTree() {
+		BinaryNode A = root.left;
+		BinaryNode B = root.right;
+		if(leftTree != null) {
+			root.left = leftTree;
+			findMax(leftTree).right = A;
+		}
+		if(rightTree != null) {
+			root.right = rightTree;
+			findMin(rightTree).left = B;
+		}
+	}
+	
+	private BinaryNode findMin(BinaryNode node) {
+		while(node.left != null) {
+			node = node.left;
+		}
+		return node;
+	}
+	
+	private BinaryNode findMax(BinaryNode node) {
+		while(node.right != null) {
+			node = node.right;
+		}
+		return node;
 	}
 	
 	/**
@@ -254,8 +297,24 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 		 * 
 		 * @return	string of the current BinaryNode
 		 */
+		//public String toString() {
+		//	return element.toString();
+		//}
+		
 		public String toString() {
-			return element.toString();
+			String temp = this.element + ", ";
+			if(left != null) {
+				temp += left.element;
+			} else {
+				temp += "null";
+			}
+			temp += ", ";
+			if(right != null) {
+				temp += right.element;
+			} else {
+				temp += "null";
+			}
+			return temp;
 		}
 		
 		/**
@@ -317,22 +376,18 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 				return this;
 			} else if(thisCompare < 0) {	
 				if(left != null && left.left != null && item.compareTo(left.element) < 0 && item.compareTo(left.left.element) < 0) {
-					//zigzig
-					return this.rightZigZig(this);
-				} else if(left != null && left.left == null && item.compareTo(left.element) < 0){
-					//zig
-					return this.rightZig(this);
+					return this.rightZigZig(this).splay(item);
+				} else if((left != null && left.left == null && item.compareTo(left.element) <= 0) || (left != null && item.compareTo(left.element) > 0)){
+					return this.rightZig(this).splay(item);
 				} else {
 					//return parent
 					return this;
 				}
 			} else {
 				if(right != null && right.right != null && item.compareTo(right.element) > 0 && item.compareTo(right.right.element) > 0) {
-					//zigzig
-					return this.leftZigZig(this);
-				} else if(right != null && right.right == null && item.compareTo(right.element) < 0) {
-					//zig
-					return this.leftZig(this);
+					return this.leftZigZig(this).splay(item);
+				} else if((right != null && right.right == null && item.compareTo(right.element) >= 0) || (right != null && item.compareTo(right.element) < 0)) {
+					return this.leftZig(this).splay(item);
 				} else {
 					//return parent
 					return this;
@@ -348,14 +403,19 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 		 * @return node An AVLNode that has been rotated
 		 */
 		public BinaryNode rightZig(BinaryNode node) {
-			BinaryNode temp1 = node.left;
-			BinaryNode temp2 = new BinaryNode(node.element); 
-			temp2.right = node.right;
-			temp2.left = temp1.right;
-			node.left = temp1.left;
-			node.element = temp1.element;
-			node.right = temp2;
-            
+			System.out.println("rightzig");
+			BinaryNode x = new BinaryNode(node.element);
+			x.right = node.right;
+			BinaryNode y = node.left;
+			
+			if(rightTree != null) {
+				rightTree.splay(findMin(rightTree).element).left = x;
+			} else {
+				rightTree = new BinaryNode(x.element);
+				rightTree.right = x.right;
+			}
+			
+			node = y;
 			return node;
 		}
 		
@@ -366,24 +426,68 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 		 * @return node An BinaryNode that has been rotated
 		 */
 		public BinaryNode leftZig(BinaryNode node) {
-			BinaryNode temp1 = node.right;
-			BinaryNode temp2 = new BinaryNode(node.element); 
-			temp2.left = node.left;
-			temp2.right = temp1.left;
-			node.right = temp1.right;
-			node.element = temp1.element;
-			node.left = temp2;
+			System.out.println("leftzig");
+			BinaryNode x = new BinaryNode(node.element);
+			x.left = node.left;
+			BinaryNode y = node.right;
 			
+			if(leftTree != null) {
+				leftTree.splay(findMax(leftTree).element).right = x;
+			} else {
+				leftTree = new BinaryNode(x.element);
+				leftTree.right = x.left;
+			}
+			
+			node = y;
 			return node;
 		}
 		
 		public BinaryNode rightZigZig(BinaryNode node) {
+			System.out.println("rightzigzig");
+			BinaryNode x = new BinaryNode(node.element);
+			x.right = node.right;
+			if(node.left.right != null) {
+				x.left = node.left.right;
+			} else {
+				x.left = null;
+			}
+			BinaryNode y = new BinaryNode(node.left.element);
+			y.right = x;
+			
+			BinaryNode z = node.left.left;
+			if(rightTree != null) {
+				rightTree.splay(findMin(rightTree).element).left = y;
+			} else {
+				rightTree = new BinaryNode(y.element);
+				rightTree.right = x;
+			}
+			node = z;
 			return node;
 		}
 		
 		public BinaryNode leftZigZig(BinaryNode node) {
+			System.out.println("leftzigzig");
+			BinaryNode x = new BinaryNode(node.element);
+			x.left = node.left;
+			if(node.right.left != null) {
+				x.right = node.right.left;
+			} else {
+				x.right = null;
+			}
+			BinaryNode y = new BinaryNode(node.right.element);
+			y.left = x;
+			
+			BinaryNode z = node.right.right;
+			if(leftTree != null) {
+				leftTree.splay(findMax(leftTree).element).right = y;
+			} else {
+				leftTree = new BinaryNode(y.element);
+				leftTree.left = x;
+			}
+			node = z;
 			return node;
 		}
+
 	}
 	
 	/**
@@ -412,7 +516,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 	 * @author risdenkj
 	 * 
 	 */
-	private class preOrderTreeIterator implements Iterator<T> {
+	private class preOrderTreeIterator implements Iterator<BinaryNode> {
 		private Stack<BinaryNode> list = new Stack<BinaryNode>();
 		private BinaryNode node = null;
 		private int mod;
@@ -446,7 +550,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 		 * @exception 	ConcurrentModificationException if the SplayTree was modified after initializing the iterator
 		 * @exception 	NoSuchElementException if there are no more elements to return
 		 */
-		public T next() {
+		public BinaryNode next() {
 			if(this.mod != modCount) {
 				throw new ConcurrentModificationException();
 			}
@@ -465,7 +569,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable<T> {
 				list.push(item.left);
 			}
 			node = item;
-			return item.element;
+			return item;
 		}
 		
 		/**
