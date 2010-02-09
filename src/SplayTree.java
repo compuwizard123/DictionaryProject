@@ -10,7 +10,7 @@ import java.util.Stack;
  * 
  */
 
-public class SplayTree<T extends Comparable<? super T>> implements Iterable {
+public class SplayTree<T extends Comparable<? super T>> implements Iterable<SplayTree<T>.BinaryNode> {
 	private BinaryNode root, leftTree, rightTree;
 	private int modCount = 0;
 	
@@ -259,7 +259,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 	 * @author risdenkj
 	 * 
 	 */
-	private class BinaryNode {
+	public class BinaryNode {
 		private T element;
 		private BinaryNode left,right;
 		
@@ -280,24 +280,8 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 		 * 
 		 * @return	string of the current BinaryNode
 		 */
-		//public String toString() {
-		//	return element.toString();
-		//}
-		
 		public String toString() {
-			String temp = this.element + ", ";
-			if(left != null) {
-				temp += left.element;
-			} else {
-				temp += "null";
-			}
-			temp += ", ";
-			if(right != null) {
-				temp += right.element;
-			} else {
-				temp += "null";
-			}
-			return temp;
+			return element.toString();
 		}
 		
 		/**
@@ -353,6 +337,12 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 			return size;
 		}
 		
+		
+		/**
+		 * 
+		 * @param item The item to splay on
+		 * @return BinaryNode 
+		 */
 		private BinaryNode splay(T item) {
 			int thisCompare = item.compareTo(element);
 			if(thisCompare == 0) {
@@ -397,9 +387,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 				rightTree = new BinaryNode(x.element);
 				rightTree.right = x.right;
 			}
-			
-			node = y;
-			return node;
+			return y;
 		}
 		
 		/**
@@ -420,9 +408,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 				leftTree = new BinaryNode(x.element);
 				leftTree.left = x.left;
 			}
-			
-			node = y;
-			return node;
+			return y;
 		}
 		
 		public BinaryNode rightZigZig(BinaryNode node) {
@@ -444,8 +430,7 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 				rightTree = new BinaryNode(y.element);
 				rightTree.right = x;
 			}
-			node = z;
-			return node;
+			return z;
 		}
 		
 		public BinaryNode leftZigZig(BinaryNode node) {
@@ -467,31 +452,9 @@ public class SplayTree<T extends Comparable<? super T>> implements Iterable {
 				leftTree = new BinaryNode(y.element);
 				leftTree.left = x;
 			}
-			node = z;
-			return node;
+			return z;
 		}
 
-	}
-	
-	/**
-	 * Creates a wrapper for the mod boolean
-	 * @author risdenkj
-	 * 
-	 */
-	private class modWrapper {
-		private boolean mod = false;
-		
-		public void setTrue() {
-			this.mod = true;
-		}
-		
-		public void setFalse() {
-			this.mod = false;
-		}
-
-		public boolean getValue() {
-			return mod;
-		}
 	}
 	
 	/**
